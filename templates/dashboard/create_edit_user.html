@@ -1,0 +1,107 @@
+{% extends "layout/dashboard_base.html" %}
+{% block content %}
+<main class="app-main">
+  {% include 'utils/message.html' %}
+
+  <div class="card card-primary card-outline mb-4 container mt-2 p-2">
+    <!-- Header -->
+    <div class="card-header">
+      <div class="card-title">User Form</div>
+    </div>
+
+    <!-- Form -->
+    <form method="post" action="">
+      {% csrf_token %}
+      <div class="card-body">
+
+        <!-- Username -->
+        <div class="mb-3">
+          <label for="id_username" class="form-label">Username</label>
+          <input type="text" class="form-control" name="username" id="id_username"
+                 value="{{ form.username.value|default:'' }}">
+          {% if form.username.errors %}
+            <div class="text-danger">{{ form.username.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+          <label for="id_email" class="form-label">Email</label>
+          <input type="email" class="form-control" name="email" id="id_email"
+                 value="{{ form.email.value|default:'' }}">
+          {% if form.email.errors %}
+            <div class="text-danger">{{ form.email.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Role -->
+        <div class="mb-3">
+          <label for="id_role" class="form-label">Role</label>
+          <select name="role" id="id_role" class="form-control">
+            <option value="admin" {% if form.role.value == 'admin' %}selected{% endif %}>Admin</option>
+            <option value="manager" {% if form.role.value == 'manager' %}selected{% endif %}>Manager</option>
+            <option value="employee" {% if form.role.value == 'employee' %}selected{% endif %}>Employee</option>
+          </select>
+          {% if form.role.errors %}
+            <div class="text-danger">{{ form.role.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        {% if not editing_user %}
+          <!-- New user only -->
+          <div class="mb-3">
+            <label for="id_password" class="form-label">Password</label>
+            <input type="password" class="form-control" name="password" id="id_password">
+            {% if form.password.errors %}
+              <div class="text-danger">{{ form.password.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="id_confirmPassword" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" name="confirmPassword" id="id_confirmPassword">
+            {% if form.confirmPassword.errors %}
+              <div class="text-danger">{{ form.confirmPassword.errors.0 }}</div>
+            {% endif %}
+          </div>
+        {% else %}
+          <!-- Password update for edit -->
+          <div class="border rounded p-3 mb-3 bg-light">
+            <strong>Password Update</strong>
+            <p class="text-muted small mb-2">Leave empty if you don’t want to change password.</p>
+
+            <div class="mb-3">
+              <label for="id_current_password" class="form-label">Current Password</label>
+              <input type="password" class="form-control" name="current_password" id="id_current_password">
+              {% if form.current_password.errors %}
+                <div class="text-danger">{{ form.current_password.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_new_password" class="form-label">New Password</label>
+              <input type="password" class="form-control" name="new_password" id="id_new_password">
+              {% if form.new_password.errors %}
+                <div class="text-danger">{{ form.new_password.errors.0 }}</div>
+              {% endif %}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_confirm_new_password" class="form-label">Confirm New Password</label>
+              <input type="password" class="form-control" name="confirm_new_password" id="id_confirm_new_password">
+              {% if form.confirm_new_password.errors %}
+                <div class="text-danger">{{ form.confirm_new_password.errors.0 }}</div>
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Footer -->
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</main>
+{% endblock content %}

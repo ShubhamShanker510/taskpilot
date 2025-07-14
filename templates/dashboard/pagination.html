@@ -1,0 +1,23 @@
+<nav aria-label="Page navigation" class="mt-3">
+  <ul class="pagination justify-content-center">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item m-1">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_username %}&username={{ selected_username }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}">Previous</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled m-1"><span class="page-link">Previous</span></li>
+    {% endif %}
+
+    <li class="page-item active m-1"><span class="page-link">{{ page_obj.number }}</span></li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item m-1">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_username %}&username={{ selected_username }}{% endif %}{% if selected_role %}&role={{ selected_role }}{% endif %}">Next</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled m-1"><span class="page-link">Next</span></li>
+    {% endif %}
+
+  </ul>
+</nav>
