@@ -17,6 +17,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.views import *
+from projects. views import *
+from tasks.views import *
 
 
 urlpatterns = [
@@ -24,8 +26,20 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('dashboard/', user_profile, name="user_profile"),
     path('dashboard/users/', user_table, name="user_table"),
-    path('dashboard/users/create', create_edit_user, name="create_user"),
-    path('dashboard/users/<int:user_id>/', create_edit_user, name="edit_user"),
-    path('dashboard/users/delete/<int:user_id>', delete_user, name="delete_user"),
+    path('dashboard/users/create/', create_edit_user, name="create_user"),
+    path('dashboard/users/edit/<int:user_id>/', create_edit_user, name="edit_user"),
+    path('dashboard/users/delete/<int:user_id>/', delete_user, name="delete_user"),
+    path('dashboard/projects/', project_table, name="project_table"),
+    path('dashboard/projects/create/',create_edit_project, name="create_project"),
+    path('dashboard/projects/edit/<int:project_id>/',create_edit_project, name="edit_project"),
+    path('dashboard/projects/delete/<int:project_id>/',delete_project, name="delete_project"),
+    path('dashboard/tasks/', task_table, name='task_table'),
+    path('dashboard/tasks/create/', create_edit_task, name='create_task'),
+    path('dashboard/tasks/<int:task_id>/',task_detail, name="task_detail" ),
+    path('dashboard/tasks/<int:task_id>/edit/<int:comment_id>', edit_comment, name="edit_comment"),
+    path('dashboard/tasks/<int:task_id>/delete/<int:comment_id>', delete_comment, name="delete_comment"),
+    path('dashboard/tasks/edit/<int:task_id>/', create_edit_task, name='edit_task'),
+    path('dashboard/tasks/delete/<int:task_id>/', delete_task, name='delete_task'),
+
     path('admin/', admin.site.urls),
 ]

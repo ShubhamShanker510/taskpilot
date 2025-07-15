@@ -6,3 +6,9 @@ class Project(models.Model):
     description = models.TextField()
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table="Projects"
+
+    def __str__(self):
+        return self.name 

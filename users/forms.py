@@ -12,7 +12,7 @@ class RegisterationForm(forms.ModelForm):
         ('employee', 'Employee'),
     )
 
-    # These fields are manually handled in view/template
+   
     password = forms.CharField(widget=forms.PasswordInput(), required=False)
     confirmPassword = forms.CharField(widget=forms.PasswordInput(), required=False)
     current_password = forms.CharField(widget=forms.PasswordInput(), required=False)

@@ -59,6 +59,7 @@ def user_table(request):
     elif selected_role:
         users=CustomUser.objects.filter(role=selected_role)
 
+    users=users.order_by("id")
   
     paginator=Paginator(users, 5)
     page_number=request.GET.get('page')

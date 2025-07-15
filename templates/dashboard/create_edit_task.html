@@ -1,0 +1,80 @@
+{% extends "layout/dashboard_base.html" %}
+{% block content %}
+<main class="app-main">
+  {% include 'utils/message.html' %}
+
+  <div class="card card-primary card-outline mb-4 container mt-2 p-2">
+    <!-- Header -->
+    <div class="card-header">
+      <div class="card-title">Task Form</div>
+    </div>
+
+    <!-- Form -->
+    <form method="post" action="">
+      {% csrf_token %}
+      <div class="card-body">
+        
+        <!-- Project -->
+        <div class="mb-3">
+          <label for="id_project" class="form-label">Project</label>
+          {{ form.project }}
+          {% if form.project.errors %}
+            <div class="text-danger">{{ form.project.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Title -->
+        <div class="mb-3">
+          <label for="id_title" class="form-label">Title</label>
+          {{ form.title }}
+          {% if form.title.errors %}
+            <div class="text-danger">{{ form.title.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Description -->
+        <div class="mb-3">
+          <label for="id_description" class="form-label">Description</label>
+          {{ form.description }}
+          {% if form.description.errors %}
+            <div class="text-danger">{{ form.description.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Assigned To -->
+        <div class="mb-3">
+          <label for="id_assigned_to" class="form-label">Assigned To</label>
+          {{ form.assigned_to }}
+          {% if form.assigned_to.errors %}
+            <div class="text-danger">{{ form.assigned_to.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Status -->
+        <div class="mb-3">
+          <label for="id_status" class="form-label">Status</label>
+          {{ form.status }}
+          {% if form.status.errors %}
+            <div class="text-danger">{{ form.status.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Due Date -->
+        <div class="mb-3">
+          <label for="id_due_date" class="form-label">Due Date</label>
+          {{ form.due_date }}
+          {% if form.due_date.errors %}
+            <div class="text-danger">{{ form.due_date.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- Submit Button -->
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</main>
+{% endblock %}
