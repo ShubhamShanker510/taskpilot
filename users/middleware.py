@@ -8,6 +8,7 @@ class HandleLoginMiddleware:
     def __call__(self, request):
         # If the request is for the login page
         if request.path.startswith('/users/login'):
+
             if request.user.is_authenticated:
                 user = request.user
 
@@ -23,7 +24,6 @@ class HandleLoginMiddleware:
                 else:
                     messages.error(request, "User role not set.")
                     return redirect('/users/logout/')
-            
         
 
         return self.get_response(request)

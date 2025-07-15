@@ -24,6 +24,8 @@ from tasks.views import *
 urlpatterns = [
     path('', redirect_to_login),
     path('users/', include('users.urls')),
+    path('logout/', logout_user, name="logout_user"),
+    path('dashboard/profile', user_profile, name="user_profile"),
     path('dashboard/home/', home, name="home"),
     path('dashboard/users/', user_table, name="user_table"),
     path('dashboard/users/create/', create_edit_user, name="create_user"),
@@ -40,6 +42,8 @@ urlpatterns = [
     path('dashboard/tasks/<int:task_id>/delete/<int:comment_id>', delete_comment, name="delete_comment"),
     path('dashboard/tasks/edit/<int:task_id>/', create_edit_task, name='edit_task'),
     path('dashboard/tasks/delete/<int:task_id>/', delete_task, name='delete_task'),
+    path('dashboard/tasks/status-update/<int:task_id>/', status_update, name='status_update')
+
 
     # path('admin/', admin.site.urls),
 ]

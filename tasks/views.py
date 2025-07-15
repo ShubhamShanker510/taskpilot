@@ -19,20 +19,42 @@ def create_edit_task(request, task_id=None):
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
         if form.is_valid():
-            form.save()
+            task_obj = form.save(commit=False)
 
-            if task:
-                messages.success(request, 'Task updated successfully.')
+            if task_obj.due_date > task_obj.project.deadline:
+                form.add_error('due_date', 'Due date cannot be after the project deadline.')
             else:
-                messages.success(request, "Task created successfully")
-            
-            return redirect('/dashboard/tasks/')
+                task_obj.save()
+                if task:
+                    messages.success(request, 'Task updated successfully.')
+                else:
+                    messages.success(request, "Task created successfully")
+                return redirect('/dashboard/tasks/')
         else:
-            messages.warning(request, "Please enter a valid data")
+            messages.warning(request, "Please enter valid data")
     else:
         form = TaskForm(instance=task)
 
     return render(request, 'dashboard/create_edit_task.html', {'form': form, 'task': task})
+
+@login_required
+def status_update(request, task_id=None):
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        
+        if new_status in ['pending', 'in_progress', 'done']:
+            task.status = new_status
+            task.save()
+            messages.success(request, f"Task status updated to {new_status}.")
+        else:
+            messages.error(request, "Invalid status.")
+
+        return redirect('/dashboard/tasks/')
+
+    return redirect('/dashboard/tasks/')
+
 
 @login_required
 def task_table(request):
@@ -41,7 +63,10 @@ def task_table(request):
     selected_username = request.GET.get('username', '').strip()
     selected_status = request.GET.get('status', '').strip()
 
-    tasks = Task.objects.select_related('project', 'assigned_to')
+    if request.user.role == 'employee':
+        tasks=Task.objects.filter(assigned_to = request.user)
+    else:
+        tasks = Task.objects.all()
 
     if selected_title:
         tasks = tasks.filter(project__name__icontains=selected_title)

@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
 
 from .models import *
@@ -10,10 +10,14 @@ from .forms import *
 from tasks.models import *
 from projects.models import *
 
+@login_required(login_url='/users/login/')
 def home(request):
 
-    if request.user == 'employee':
-        redirect('/dashboard/tasks/')
+    if request.user is None:
+        return redirect('/users/login')
+
+    if hasattr(request.user, 'role') and request.user.role == 'employee':
+        return redirect('/dashboard/tasks/')
 
     pending_task=Task.objects.filter(status="pending").count()
     completed_task=Task.objects.filter(status="done").count()
@@ -52,7 +56,11 @@ def login_user(request):
             if user is not None:
                 login(request, user)
                 messages.success(request,"User Login successfully")
-                return redirect('/dashboard/')
+                
+                if request.user.role == 'admin' or request.user.role == 'manager':
+                    return redirect('/dashboard/home/')
+                elif request.user.role == 'employee':
+                    return redirect('/dashboard/tasks')
             
             else:
                 messages.error(request, "Invalid user")
@@ -70,10 +78,16 @@ def login_user(request):
 def user_profile(request):
     user=request.user
 
-    return render(request, 'layout/dashboard_base.html', {'user':user})
+    return render(request, 'dashboard/user_profile.html', {'user':user})
 
 # user_table
 def user_table(request):
+    if request.user.role == 'manager':
+        return redirect('/dashboard/home/')
+    
+    if request.user.role == 'employee':
+        return redirect('/dashboard/tasks/')
+
     users=CustomUser.objects.all()
 
     # filter-searching
@@ -81,7 +95,7 @@ def user_table(request):
     selected_role=request.GET.get('role','').strip()
 
     if selected_username:
-        users=CustomUser.objects.filter(username=selected_username)
+        users=CustomUser.objects.filter(username__icontains=selected_username)
     elif selected_role:
         users=CustomUser.objects.filter(role=selected_role)
 
@@ -133,9 +147,10 @@ def create_edit_user(request, user_id=None):
                     else:
                         new_user.set_password(new_pass)
 
-                new_user.save()
-                messages.success(request, "User updated successfully")
-                return redirect('/dashboard/users/')
+                if not form.errors:
+                    new_user.save()
+                    messages.success(request, "User updated successfully")
+                    return redirect('/dashboard/users/')
         else:
             messages.error(request, "Please correct the errors")
     else:
@@ -151,3 +166,20 @@ def delete_user(request, user_id):
     user.delete()
     messages.success(request, "User deleted successfully")
     return redirect(f'/dashboard/users/?page={selected_page}')
+
+
+@login_required
+def logout_user(request):
+    try:
+        logout(request)
+        return redirect('/users/login')
+    except:
+        messages.warning("Something went wrong")
+        
+
+
+        if hasattr(request.user, 'role') and request.user.role == 'employee':
+            return redirect('/dashboard/tasks/')
+        elif hasattr(request.user, 'role') and (request.user.role == 'manager' or request.user.role == 'admin'):
+            return redirect('/dashboard/tasks')
+                                                

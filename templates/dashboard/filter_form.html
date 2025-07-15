@@ -2,22 +2,24 @@
   <div class="row align-items-end">
 
     <!-- Username Filter (Live Search) -->
-    <div class="{% if request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
-      <label for="id_username" class="form-label">Username</label>
-      <input
-        type="text"
-        class="form-control"
-        id="id_username"
-        name="username"
-        value="{{ selected_username }}"
-        placeholder="Search by username"
-        oninput="onSubmit()"
-      />
-    </div>
+    {% if request.user.role == 'manager' or request.user.role == 'admin' %}
+    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
+  <label for="id_username" class="form-label">Username</label>
+  <input
+    type="text"
+    class="form-control"
+    id="id_username"
+    name="username"
+    value="{{ selected_username }}"
+    placeholder="Search by username"
+    oninput="delayedSubmit(this)"
+  />
+</div>
+    {% endif %}
 
     {% if request.path == '/dashboard/projects/' or request.path == '/dashboard/tasks/' %}
     <!-- Title Filter -->
-    <div class="{% if request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
+    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
       <label for="id_title" class="form-label">Name</label>
       <input
         type="text"
@@ -26,12 +28,13 @@
         name="title"
         value="{{ selected_title }}"
         placeholder="Search by project/task name"
-        oninput="onSubmit()"
+        oninput="delayedSubmit(this)"
       />
     </div>
     {% endif %}
 
     <!-- Role Filter -->
+    {% if request.user.role == 'manager' or request.user.role == 'admin' %}
     <div class="{% if request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
       <label for="id_role" class="form-label">Role</label>
       <select name="role" id="id_role" class="form-control" onchange="this.form.submit()">
@@ -41,10 +44,11 @@
         <option value="employee" {% if selected_role == "employee" %}selected{% endif %}>Employee</option>
       </select>
     </div>
+    {% endif %}
 
     {% if request.path == '/dashboard/tasks/' %}
     <!-- Status Filter -->
-    <div class="col-md-2">
+    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
       <label for="id_status" class="form-label">Status</label>
       <select name="status" id="id_status" class="form-control" onchange="this.form.submit()">
         <option value="">All Statuses</option>
@@ -56,7 +60,7 @@
     {% endif %}
 
     <!-- Clear Button -->
-    <div class="{% if request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %} mt-2">
+    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
       {% if request.path == '/dashboard/projects/' %}
         <a href="{% url 'project_table' %}" class="btn btn-secondary mt-4 w-100">Clear</a>
       {% elif request.path == '/dashboard/users/' %}
@@ -70,11 +74,30 @@
 </form>
 
 <script>
-  let timeout = null;
-  function onSubmit() {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => {
+  let typingTimer;
+  let activeInput=null
+
+  function delayedSubmit(inputElement){
+    clearTimeout(typingTimer)
+    activeInput=inputElement.id
+     typingTimer = setTimeout(() => {
+      localStorage.setItem('restoreFocus', activeInput); 
       document.getElementById('filterForm').submit();
     }, 500);
   }
+
+   window.addEventListener('DOMContentLoaded', () => {
+    const toFocus = localStorage.getItem('restoreFocus');
+    if (toFocus) {
+      const el = document.getElementById(toFocus);
+      if (el) {
+        el.focus();
+        // Optional: move cursor to end
+        const val = el.value;
+        el.value = '';
+        el.value = val;
+      }
+      localStorage.removeItem('restoreFocus');
+    }
+  });
 </script>
