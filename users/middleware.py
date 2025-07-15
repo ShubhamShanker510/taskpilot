@@ -6,17 +6,24 @@ class HandleLoginMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.path == '/users/login/':
+        # If the request is for the login page
+        if request.path.startswith('/users/login'):
             if request.user.is_authenticated:
                 user = request.user
 
                 # Check if user has a known role
-                if hasattr(user, 'role') and user.role in ['admin', 'manager', 'employee']:
-                    return redirect('/dashboard/')
+                if hasattr(user, 'role'):
+                    if user.role in ['admin', 'manager']:
+                        return redirect('/dashboard/home')
+                    elif user.role == 'employee':
+                        return redirect('/dashboard/tasks')
+                    else:
+                        messages.error(request, "Unknown user role.")
+                        return redirect('/users/logout/') 
                 else:
-                    messages.error(request, "Unkown user.")
-                    return redirect('/users/login/')
-            # else:
-            #     return redirect('/users/login/')
+                    messages.error(request, "User role not set.")
+                    return redirect('/users/logout/')
+            
+        
 
         return self.get_response(request)

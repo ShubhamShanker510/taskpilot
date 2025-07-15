@@ -43,6 +43,10 @@ def create_edit_project(request, project_id=None):
 
 @login_required
 def project_table(request):
+    if hasattr(request.user, 'role') and request.user.role == 'employee':
+        return redirect('/dashboard/tasks/')
+
+
     selected_title = request.GET.get('title', '').strip()
     selected_role = request.GET.get('role', '').strip()
     selected_username = request.GET.get('username', '').strip()

@@ -7,6 +7,32 @@ from django.core.paginator import Paginator
 
 from .models import *
 from .forms import *
+from tasks.models import *
+from projects.models import *
+
+def home(request):
+
+    if request.user == 'employee':
+        redirect('/dashboard/tasks/')
+
+    pending_task=Task.objects.filter(status="pending").count()
+    completed_task=Task.objects.filter(status="done").count()
+    inprogress_task=Task.objects.filter(status="in_progress").count()
+    total_admin=CustomUser.objects.filter(role="admin").count()
+    total_manager=CustomUser.objects.filter(role="manager").count()
+    total_employee=CustomUser.objects.filter(role="employee").count()
+    total_projects=Project.objects.all().count()
+
+    return render(request, 'dashboard/home.html',{
+        'pending_task':pending_task,
+        'completed_task':completed_task,
+        'inprogress_task':inprogress_task,
+        'total_admin':total_admin,
+        'total_manager':total_manager,
+        'total_employee':total_employee,
+        'total_projects':total_projects
+    })
+
 
 # custom redirect to login
 def redirect_to_login(request):

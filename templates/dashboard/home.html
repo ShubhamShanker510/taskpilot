@@ -1,0 +1,103 @@
+{% extends "layout/dashboard_base.html" %}
+{% block content %}
+<main class="app-main">
+  <!-- Header -->
+  <div class="app-content-header">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-6"><h3 class="mb-0">Dashboard</h3></div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-end">
+            <li class="breadcrumb-item active">Dashboard</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div class="app-content">
+    <div class="container-fluid">
+      
+      <!-- Users Section -->
+      <h2 class="mb-3 mt-4">Users Overview</h2>
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box text-bg-primary">
+            <div class="inner">
+              <h3>{{ total_admin }}</h3>
+              <p>Total Admins</p>
+            </div>
+            <i class="small-box-icon fas fa-user-shield"></i>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box text-bg-info">
+            <div class="inner">
+              <h3>{{ total_manager }}</h3>
+              <p>Total Managers</p>
+            </div>
+            <i class="small-box-icon fas fa-user-tie"></i>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box text-bg-warning">
+            <div class="inner">
+              <h3>{{ total_employee }}</h3>
+              <p>Total Employees</p>
+            </div>
+            <i class="small-box-icon fas fa-user"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Projects Section -->
+      <h2 class="mb-3 mt-4">Projects</h2>
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box text-bg-success">
+            <div class="inner">
+              <h3>{{ total_projects }}</h3>
+              <p>Total Projects</p>
+            </div>
+            <i class="small-box-icon fas fa-folder-open"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task Status Section -->
+      <h2 class="mb-3 mt-4">Task Status</h2>
+      <div class="row">
+        <div class="col-lg-3 col-6">
+          <div class="small-box text-bg-warning">
+            <div class="inner">
+              <h3>{{ pending_task }}</h3>
+              <p>Pending Tasks</p>
+            </div>
+            <i class="small-box-icon fas fa-hourglass-half"></i>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box text-bg-info">
+            <div class="inner">
+              <h3>{{ inprogress_task }}</h3>
+              <p>In-Progress Tasks</p>
+            </div>
+            <i class="small-box-icon fas fa-spinner"></i>
+          </div>
+        </div>
+        <div class="col-lg-3 col-6">
+          <div class="small-box text-bg-success">
+            <div class="inner">
+              <h3>{{ completed_task }}</h3>
+              <p>Completed Tasks</p>
+            </div>
+            <i class="small-box-icon fas fa-check-circle"></i>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+{% endblock %}
