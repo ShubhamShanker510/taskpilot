@@ -1,0 +1,65 @@
+{% extends "layout/dashboard_base.html" %}
+
+{% block content%}
+<main class="app-main">
+   <div class="container mt-2 p-2">
+     {% include 'utils/message.html' %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+  
+  <div>
+    
+<a href="{% url 'create_user' %}" style="color: aliceblue;"><button class="btn btn-primary">Create User</button></a>
+  </div>
+
+
+  <div>
+    {% include 'dashboard/filter_form.html' %}
+  </div>
+
+</div>
+
+  </div>
+       <div class="card mb-4 container mt-2 p-2">
+                  <div class="card-header">
+                    <h3 class="card-title">User Table</h3>
+                  </div>
+                  <!-- /.card-header -->
+                  <div class="card-body p-0 ">
+                    <table class="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Send_By</th>
+                          <th>messages</th>
+                          {% if request.user.role == 'admin' %}
+                          <th>is_read</th>
+                          <th>created_at</th>
+                          <th></th>
+                          {% endif %}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for notification in notifications %}
+                        <tr class="align-middle">
+                          <td>{{notification.sender}}</td>
+                          <td>{{notification.message}}</td>
+                         {% if request.user.role == 'admin' %}
+                           <td>{{notification.is_read}}</td>
+                          <td>{{notification.created_at}}</td>
+                          <td><a href="{% url 'delete_notification' notification.id%}?page={{ page_obj.number }}" onclick="return confirm('Are you sure you want to delete this user?')"><button class="btn btn-danger">Delete</button></a></td>
+                         {% endif %}
+                        </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <!-- /.card-body -->
+                </div>
+        
+                {% if notificationcount > 5 %}
+                    <div class="container position-fixed bottom-0 start-50 translate-middle-y mb-4">
+                      {% include 'dashboard/pagination.html' %}
+                    </div>
+                  {% endif %}
+
+      </main>
+      {%endblock%}

@@ -10,7 +10,7 @@
     </div>
 
     <!-- Form -->
-    <form method="post" action="">
+    <form method="post" action="" onsubmit="handleSubmit(event)" id="taskform">
       {% csrf_token %}
       <div class="card-body">
         
@@ -71,10 +71,25 @@
       </div>
 
       <!-- Submit Button -->
-      <div class="card-footer">
-        <button type="submit" class="btn btn-primary">Submit</button>
+      <div class="card-footer ">
+        <button id="submitButton" type="submit" class="btn btn-primary">Submit</button>
       </div>
     </form>
   </div>
 </main>
+<script>
+  function handleSubmit(event) {
+    // Disable the button
+    const submitButton = document.getElementById('submitButton');
+    submitButton.disabled = true;
+    submitButton.innerText = 'Submitting...';
+
+    // Show loader
+    document.getElementById('loader').style.display = 'block';
+
+    // Allow form to continue submitting
+    document.getElementById('taskForm').submit();
+  }
+</script>
+
 {% endblock %}

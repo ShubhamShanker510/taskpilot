@@ -2,15 +2,49 @@ from django.shortcuts import render
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import authenticate, login
+from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
 
 from .models import *
 from .forms import *
 from users.models import *
+from notifications.models import *
 
 
+def send_task_notification_email(user, task):
+    subject = f"You have been assigned a new task: {task.title}"
+    message = f"Hi {user.username},\n\nYou have a new task: {task.title}."
+
+    html_message = f"""
+    <html>
+      <body>
+        <h2 style="color:#4CAF50;">Task Assigned</h2>
+        <p>Hello <strong>{user.username}</strong>,</p>
+        <p>You have been assigned a new task:</p>
+        <ul>
+          <li><strong>Title:</strong> {task.title}</li>
+          <li><strong>Description:</strong> {task.description}</li>
+          <li><strong>Due Date:</strong> {task.due_date}</li>
+        </ul>
+        <p>Please log in to the portal to start working.</p>
+      </body>
+    </html>
+    """
+
+    try:
+        send_mail(
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        return True
+    except BadHeaderError:
+        messages.warning("Invalid header found while sending email.")
+
+    return False
 # Create your views here.
 @login_required
 def create_edit_task(request, task_id=None):
@@ -25,10 +59,22 @@ def create_edit_task(request, task_id=None):
                 form.add_error('due_date', 'Due date cannot be after the project deadline.')
             else:
                 task_obj.save()
+
+                
+                email_sent = send_task_notification_email(task_obj.assigned_to, task_obj)
+                
                 if task:
-                    messages.success(request, 'Task updated successfully.')
+                        msg = 'Task updated successfully'
+                        
                 else:
-                    messages.success(request, "Task created successfully")
+                        msg = 'Task created successfully'
+
+                if email_sent:
+                        msg += ' and email sent.'
+                else:
+                        msg += ' but email failed.'
+
+                messages.success(request, msg)
                 return redirect('/dashboard/tasks/')
         else:
             messages.warning(request, "Please enter valid data")
