@@ -19,7 +19,7 @@ from django.urls import path, include
 from users.views import *
 from projects. views import *
 from tasks.views import *
-from notifications.views import *
+
 
 
 urlpatterns = [
@@ -44,8 +44,5 @@ urlpatterns = [
     path('dashboard/tasks/edit/<int:task_id>/', create_edit_task, name='edit_task'),
     path('dashboard/tasks/delete/<int:task_id>/', delete_task, name='delete_task'),
     path('dashboard/tasks/status-update/<int:task_id>/', status_update, name='status_update'),
-    path('dashboard/notifications', notification_list, name="notification_list"),
-    path('dashboard/notifications/create/', createNotification, name='create_notification'),
-    path('dashboard/notification/delete/<int:notification_id>/', deleteNotification, name='delete_notification')
     # path('admin/', admin.site.urls),
 ]

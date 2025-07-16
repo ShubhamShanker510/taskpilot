@@ -11,10 +11,8 @@ from .forms import *
 from users.models import *
 
 
-# Create your views here.
-
-# create project
-@login_required
+# create and edit project
+@login_required(login_url='/users/login/')
 def create_edit_project(request, project_id=None):
     project=get_object_or_404(Project, id=project_id) if project_id else None
     if request.method=="POST":
@@ -41,10 +39,9 @@ def create_edit_project(request, project_id=None):
     return render(request, 'dashboard/create_edit_project.html', {'form': form, 'project': project})
 
 
-@login_required
+# all project list
+@login_required(login_url='/users/login/')
 def project_table(request):
-    if hasattr(request.user, 'role') and request.user.role == 'employee':
-        return redirect('/dashboard/tasks/')
 
 
     selected_title = request.GET.get('title', '').strip()
@@ -85,9 +82,13 @@ def project_table(request):
     })
 
 
-@login_required
+#delete project by admin
+@login_required(login_url='/users/login/')
 def delete_project(request, project_id):
-    project=get_object_or_404(Project, id=project_id)
-    project.delete()
-    messages.success(request, "Project deleted successfully")
-    return redirect('/dashboard/projects/')    
+    if request.user.role == 'admin':
+        project=get_object_or_404(Project, id=project_id)
+        project.delete()
+        messages.success(request, "Project deleted successfully")
+        return redirect('/dashboard/projects/')
+    elif request.user.role =='manager':
+        return redirect('/dashboard/projects/')

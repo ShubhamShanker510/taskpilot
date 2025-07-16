@@ -8,9 +8,8 @@ from django.core.paginator import Paginator
 from .models import *
 from .forms import *
 from users.models import *
-from notifications.models import *
 
-
+# Html format for sending mail 
 def send_task_notification_email(user, task):
     subject = f"You have been assigned a new task: {task.title}"
     message = f"Hi {user.username},\n\nYou have a new task: {task.title}."
@@ -45,9 +44,15 @@ def send_task_notification_email(user, task):
         messages.warning("Invalid header found while sending email.")
 
     return False
+
 # Create your views here.
-@login_required
+@login_required(login_url='/users/login/')
 def create_edit_task(request, task_id=None):
+    
+    if request.user.role == 'employee':
+        return redirect('/dashboard/tasks/')
+
+
     task = get_object_or_404(Task, id=task_id) if task_id else None
 
     if request.method == 'POST':
@@ -83,7 +88,8 @@ def create_edit_task(request, task_id=None):
 
     return render(request, 'dashboard/create_edit_task.html', {'form': form, 'task': task})
 
-@login_required
+# updating status of task
+@login_required(login_url='/users/login/')
 def status_update(request, task_id=None):
     task = get_object_or_404(Task, id=task_id)
 
@@ -102,7 +108,8 @@ def status_update(request, task_id=None):
     return redirect('/dashboard/tasks/')
 
 
-@login_required
+# task list
+@login_required(login_url='/users/login/')
 def task_table(request):
     selected_title = request.GET.get('title', '').strip()
     selected_role = request.GET.get('role', '').strip()
@@ -153,13 +160,21 @@ def task_table(request):
     })
 
 
-@login_required
+# delete task by id
+@login_required(login_url='/users/login/')
 def delete_task(request, task_id):
+
+    if request.user.role == 'employee' or request.user.role == 'manager':
+        return redirect('/dashboard/tasks/')
+    
+
     task=get_object_or_404(Task, id=task_id)
     task.delete()
     messages.success(request, "Task deleted successfully")
     return redirect('/dashboard/tasks')
 
+# task details by id
+@login_required(login_url='/users/login/')
 def task_detail(request, task_id):
     task = get_object_or_404(Task, id=task_id)
     comments = task.comments.all()
@@ -186,10 +201,12 @@ def task_detail(request, task_id):
         'editing_comment': editing_comment,
     })
 
-
-@login_required
+# delete comment
+@login_required(login_url='/users/login/')
 def delete_comment(request, task_id, comment_id):
     comment = get_object_or_404(Comment, id=comment_id, task__id=task_id)
+
+    #either admin can delete comment or the user who send that comment
     if comment.author == request.user or request.user.role == 'admin':
         comment.delete()
         messages.success(request, "Comment deleted successfully.")
@@ -198,7 +215,8 @@ def delete_comment(request, task_id, comment_id):
     return redirect('task_detail', task_id=task_id)
 
 
-@login_required
+# edit commenting 
+@login_required(login_url='/users/login/')
 def edit_comment(request, task_id, comment_id):
     comment = get_object_or_404(Comment, id=comment_id, task__id=task_id)
 

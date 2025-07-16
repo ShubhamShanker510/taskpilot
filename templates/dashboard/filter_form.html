@@ -34,8 +34,9 @@
     {% endif %}
 
     <!-- Role Filter -->
-    {% if request.user.role == 'manager' or request.user.role == 'admin' %}
-    <div class="{% if request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
+   {% if request.path != '/dashboard/tasks/' %}
+  {% if request.user.role == 'manager' or request.user.role == 'admin' %}
+    <div class="col-md-3">
       <label for="id_role" class="form-label">Role</label>
       <select name="role" id="id_role" class="form-control" onchange="this.form.submit()">
         <option value="">All Roles</option>
@@ -43,7 +44,10 @@
         <option value="manager" {% if selected_role == "manager" %}selected{% endif %}>Manager</option>
       </select>
     </div>
-    {% endif %}
+  {% endif %}
+{% endif %}
+
+
 
     {% if request.path == '/dashboard/tasks/' %}
     <!-- Status Filter -->

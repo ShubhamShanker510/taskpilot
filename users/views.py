@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect, get_object_or_404
+from django.shortcuts import render,redirect, get_object_or_404, get_list_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
@@ -12,9 +12,6 @@ from projects.models import *
 
 @login_required(login_url='/users/login/')
 def home(request):
-
-    if request.user is None:
-        return redirect('/users/login')
 
     if hasattr(request.user, 'role') and request.user.role == 'employee':
         return redirect('/dashboard/tasks/')
@@ -74,13 +71,14 @@ def login_user(request):
 
 
 # user profile
-@login_required
+@login_required(login_url='/users/login/')
 def user_profile(request):
     user=request.user
 
     return render(request, 'dashboard/user_profile.html', {'user':user})
 
 # user_table
+@login_required(login_url='/users/login/')
 def user_table(request):
     if request.user.role == 'manager':
         return redirect('/dashboard/home/')
@@ -88,7 +86,7 @@ def user_table(request):
     if request.user.role == 'employee':
         return redirect('/dashboard/tasks/')
 
-    users=CustomUser.objects.all()
+    users=CustomUser.objects.filter(is_superuser = False)
 
     # filter-searching
     selected_username=request.GET.get('username', '').strip()
@@ -97,21 +95,21 @@ def user_table(request):
     if selected_username:
         users=CustomUser.objects.filter(username__icontains=selected_username)
     elif selected_role:
-        users=CustomUser.objects.filter(role=selected_role)
+        users=CustomUser.objects.filter(role=selected_role, is_superuser=False)
 
     users=users.order_by("id")
   
     paginator=Paginator(users, 5)
     page_number=request.GET.get('page')
     page=paginator.get_page(page_number)
-    usercount=CustomUser.objects.all().count()
+    usercount=users.count()
 
 
     return render(request, 'dashboard/user_table.html', {'users': page,'page_obj':page,'usercount':usercount, 'selected_username': selected_username,'selected_role': selected_role,})
 
 
 
-@staff_member_required
+@login_required(login_url='/users/login/')
 def create_edit_user(request, user_id=None):
     user = get_object_or_404(CustomUser, id=user_id) if user_id else None
 
@@ -159,8 +157,15 @@ def create_edit_user(request, user_id=None):
     return render(request, 'dashboard/create_edit_user.html', {'form': form, 'editing_user': user})
 
 
-@staff_member_required
+@login_required(login_url='/users/login/')
 def delete_user(request, user_id):
+
+    if request.user.role == 'manager':
+        return redirect('/dashboard/home/')
+    
+    if request.user.role == 'employee':
+        return redirect('/dashboard/tasks/')
+
     selected_page = request.GET.get('page',1)
     user = get_object_or_404(CustomUser, id=user_id)
     user.delete()
@@ -168,7 +173,7 @@ def delete_user(request, user_id):
     return redirect(f'/dashboard/users/?page={selected_page}')
 
 
-@login_required
+@login_required(login_url='/users/login/')
 def logout_user(request):
     try:
         logout(request)

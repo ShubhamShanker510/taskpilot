@@ -39,7 +39,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'projects.apps.ProjectsConfig',
-    'notifications.apps.NotificationsConfig',
     'tasks.apps.TasksConfig',
     'django.contrib.admin',
     'django.contrib.auth',
