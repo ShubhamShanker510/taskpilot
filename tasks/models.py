@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from projects.models import Project
 
+# schema for task
 class Task(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
@@ -13,9 +14,9 @@ class Task(models.Model):
     class Meta:
         db_table="Tasks"
 
-
+#schema for comments
 class Comment(models.Model):
-    task = models.ForeignKey('Task', on_delete=models.CASCADE, related_name='comments')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='comments')
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

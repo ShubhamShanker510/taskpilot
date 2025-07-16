@@ -3,7 +3,7 @@
 
     <!-- Username Filter (Live Search) -->
     {% if request.user.role == 'manager' or request.user.role == 'admin' %}
-    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
+    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-3{% else %}col-md-3{% endif %}">
   <label for="id_username" class="form-label">Username</label>
   <input
     type="text"
@@ -19,7 +19,7 @@
 
     {% if request.path == '/dashboard/projects/' or request.path == '/dashboard/tasks/' %}
     <!-- Title Filter -->
-    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-2{% else %}col-md-3{% endif %}">
+    <div class="{% if request.user.role == 'employee' %}col-md-4{% elif request.path == '/dashboard/tasks/' %}col-md-3{% else %}col-md-3{% endif %}">
       <label for="id_title" class="form-label">Name</label>
       <input
         type="text"
