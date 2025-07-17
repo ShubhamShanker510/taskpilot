@@ -12,7 +12,16 @@ class RegisterationForm(forms.ModelForm):
         ('employee', 'Employee'),
     )
 
-   
+    image=forms.ImageField(required=False)
+    bio = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'rows': 4,
+            'class': 'form-control',
+            'placeholder': 'Write something about yourself...'
+        })
+    )
+
     password = forms.CharField(widget=forms.PasswordInput(), required=False)
     confirmPassword = forms.CharField(widget=forms.PasswordInput(), required=False)
     current_password = forms.CharField(widget=forms.PasswordInput(), required=False)
@@ -23,7 +32,7 @@ class RegisterationForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'email', 'role']
+        fields = ['username', 'email', 'role', 'image', 'bio']
 
 
 class LoginForm(forms.Form):

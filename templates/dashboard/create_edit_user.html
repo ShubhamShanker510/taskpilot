@@ -10,7 +10,7 @@
     </div>
 
     <!-- Form -->
-    <form method="post" action="">
+    <form method="post" action="" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="card-body">
 
@@ -35,6 +35,7 @@
         </div>
 
         <!-- Role -->
+         {% if request.user.role == 'admin' %}
         <div class="mb-3">
           <label for="id_role" class="form-label">Role</label>
           <select name="role" id="id_role" class="form-control">
@@ -46,6 +47,29 @@
             <div class="text-danger">{{ form.role.errors.0 }}</div>
           {% endif %}
         </div>
+        {% endif %}
+
+        <!-- Image -->
+        <div class="mb-3">
+          <label for="id_image" class="form-label">Profile Image</label>
+          <input type="file" class="form-control" name="image" id="id_image">
+          {% if editing_user and editing_user.image %}
+            <img src="{{ editing_user.image.url }}" alt="Current Image" class="img-thumbnail mt-2" width="120">
+          {% endif %}
+          {% if form.image.errors %}
+            <div class="text-danger">{{ form.image.errors.0 }}</div>
+          {% endif %}
+        </div>
+
+        <!-- bio -->
+        <div class="mb-3">
+            <label for="{{ form.bio.id_for_label }}" class="form-label">Bio</label>
+            {{ form.bio }}
+            {% for error in form.bio.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
 
         {% if not editing_user %}
           <!-- New user only -->

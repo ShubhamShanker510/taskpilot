@@ -108,13 +108,13 @@ def user_table(request):
     return render(request, 'dashboard/user_table.html', {'users': page,'page_obj':page,'usercount':usercount, 'selected_username': selected_username,'selected_role': selected_role,})
 
 
-
+# create/edit user
 @login_required(login_url='/users/login/')
-def create_edit_user(request, user_id=None):
+def create_edit_update_user(request, user_id=None):
     user = get_object_or_404(CustomUser, id=user_id) if user_id else None
 
     if request.method == "POST":
-        form = RegisterationForm(request.POST, instance=user)
+        form = RegisterationForm(request.POST, request.FILES, instance=user)
 
         if form.is_valid():
             new_user = form.save(commit=False)
@@ -128,9 +128,6 @@ def create_edit_user(request, user_id=None):
                     form.add_error("confirmPassword", "Passwords do not match")
                 else:
                     new_user.set_password(password)
-                    new_user.save()
-                    messages.success(request, "User created successfully")
-                    return redirect('/dashboard/users/')
 
             else:
                 current = request.POST.get("current_password")
@@ -145,10 +142,15 @@ def create_edit_user(request, user_id=None):
                     else:
                         new_user.set_password(new_pass)
 
-                if not form.errors:
-                    new_user.save()
-                    messages.success(request, "User updated successfully")
-                    return redirect('/dashboard/users/')
+            # Handle image upload manually
+            if 'image' in request.FILES:
+                new_user.image = request.FILES['image']
+
+            if not form.errors:
+                new_user.save()
+                messages.success(request, "User created successfully" if not user else "User updated successfully")
+                return redirect('/dashboard/users/')
+
         else:
             messages.error(request, "Please correct the errors")
     else:
@@ -156,7 +158,54 @@ def create_edit_user(request, user_id=None):
 
     return render(request, 'dashboard/create_edit_user.html', {'form': form, 'editing_user': user})
 
+# update own profile
+@login_required(login_url='/users/login/')
+def update_own_profile(request, user_id):
+    user = get_object_or_404(CustomUser, id=user_id)
 
+    if request.method == 'POST':
+        form = RegisterationForm(request.POST, request.FILES, instance=user)
+        form.fields['role'].required = False
+        if form.is_valid():
+
+            update_user = form.save(commit=False)
+
+            # Handle password update
+            current = request.POST.get("current_password")
+            new_pass = request.POST.get("new_password")
+            confirm = request.POST.get("confirm_new_password")
+
+            if new_pass:
+                if not user.check_password(current):
+                    form.add_error("current_password", "Current password is incorrect")
+                elif new_pass != confirm:
+                    form.add_error("confirm_new_password", "New passwords do not match")
+                else:
+                    update_user.set_password(new_pass)
+
+            # Handle image upload
+            if 'image' in request.FILES:
+                update_user.image = request.FILES['image']
+
+            if not form.errors:
+                update_user.save()
+                messages.success(request, "User updated successfully")
+                return redirect('/dashboard/profile/')
+        else:
+            print("Form errors:", form.errors) 
+            messages.warning(request, "Please enter valid data")
+
+    else:
+        form = RegisterationForm(instance=user)
+
+    return render(request, 'dashboard/create_edit_user.html', {
+        'form': form,
+        'editing_user': user
+    })
+
+
+
+# delete user by id
 @login_required(login_url='/users/login/')
 def delete_user(request, user_id):
 
@@ -173,6 +222,7 @@ def delete_user(request, user_id):
     return redirect(f'/dashboard/users/?page={selected_page}')
 
 
+# logout
 @login_required(login_url='/users/login/')
 def logout_user(request):
     try:
