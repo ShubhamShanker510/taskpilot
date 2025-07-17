@@ -21,7 +21,7 @@ class RegisterationForm(forms.ModelForm):
             'placeholder': 'Write something about yourself...'
         })
     )
-
+    
     password = forms.CharField(widget=forms.PasswordInput(), required=False)
     confirmPassword = forms.CharField(widget=forms.PasswordInput(), required=False)
     current_password = forms.CharField(widget=forms.PasswordInput(), required=False)
@@ -34,6 +34,21 @@ class RegisterationForm(forms.ModelForm):
         model = CustomUser
         fields = ['username', 'email', 'role', 'image', 'bio']
 
+    def __init__(self, *args, **kwargs):
+        # Get the user instance if passed
+        self.instance = kwargs.get('instance', None)
+        super().__init__(*args, **kwargs)
+
+        # If creating a new user (no instance), make username, email, and password required
+        if self.instance is None or self.instance.pk is None:
+            self.fields['username'].required = True
+            self.fields['email'].required = True
+            self.fields['password'].required = True
+            self.fields['confirmPassword'].required = True
+        else:
+            # If editing, only username and email should be required
+            self.fields['username'].required = True
+            self.fields['email'].required = True
 
 class LoginForm(forms.Form):
     username=forms.CharField(required=True)
