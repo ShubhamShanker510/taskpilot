@@ -1,12 +1,13 @@
-from django.shortcuts import render,redirect, get_object_or_404, get_list_or_404
+import os
+from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
 
 from .models import *
 from .forms import *
+from .tasks import *
 from tasks.models import *
 from projects.models import *
 
@@ -142,9 +143,20 @@ def create_edit_update_user(request, user_id=None):
                     else:
                         new_user.set_password(new_pass)
 
-            # Handle image upload manually
-            if 'image' in request.FILES:
-                new_user.image = request.FILES['image']
+            image=request.FILES.get('image')
+
+            if image:
+                image_name=f"profile_images/{user.username}_{image.name}"
+                image_path=os.path.join(settings.MEDIA_ROOT, image_name)
+
+                with open(image_path, 'wb+') as destination:
+                    for chunk in image.chunks():
+                        destination.write(chunk)
+
+                
+                upload_user_image_to_cloudinary.delay(user.id, image_path)
+
+
 
             if not form.errors:
                 new_user.save()
@@ -183,9 +195,21 @@ def update_own_profile(request, user_id):
                 else:
                     update_user.set_password(new_pass)
 
-            # Handle image upload
-            if 'image' in request.FILES:
-                update_user.image = request.FILES['image']
+
+            # Handling images
+            image=request.FILES.get('image')
+
+            if image:
+                image_name=f"profile_images/{user.username}_{image.name}"
+                image_path=os.path.join(settings.MEDIA_ROOT, image_name)
+
+                with open(image_path, 'wb+') as destination:
+                    for chunk in image.chunks():
+                        destination.write(chunk)
+
+                
+                upload_user_image_to_cloudinary.delay(user.id, image_path)
+
 
             if not form.errors:
                 update_user.save()
