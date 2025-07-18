@@ -10,7 +10,7 @@
     </div>
 
     <!-- Form -->
-    <form method="post" action="" enctype="multipart/form-data">
+    <form method="post" action="" enctype="multipart/form-data" onsubmit="handleSubmit(event)" id="taskform">
       {% csrf_token %}
       <div class="card-body">
 
@@ -128,4 +128,18 @@
     </form>
   </div>
 </main>
+<script>
+  function handleSubmit(event) {
+    // Disable the button
+    const submitButton = document.getElementById('submitButton');
+    submitButton.disabled = true;
+    submitButton.innerText = 'Submitting...';
+
+    // Show loader
+    document.getElementById('loader').style.display = 'block';
+
+    // Allow form to continue submitting
+    document.getElementById('taskForm').submit();
+  }
+</script>
 {% endblock content %}

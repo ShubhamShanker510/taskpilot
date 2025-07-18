@@ -16,3 +16,6 @@ class CustomUser(AbstractUser):
 
     class Meta:
         db_table="Users"
+        indexes=[
+            models.Index(fields=['role', 'is_superuser']),
+        ]

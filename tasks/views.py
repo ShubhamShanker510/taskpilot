@@ -1,11 +1,9 @@
-import threading
 from django.shortcuts import render
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail, BadHeaderError
 from django.core.paginator import Paginator
-
+from django.core.cache import cache
 
 from .tasks import *
 from .models import *
@@ -23,8 +21,16 @@ def create_edit_task(request, task_id=None):
     if request.user.role == 'employee':
         return redirect('/dashboard/tasks/')
 
+    task=None
 
-    task = get_object_or_404(Task, id=task_id) if task_id else None
+    if task_id:
+        cache_key=f"task:{task_id}"
+        task=cache.get(cache_key)
+
+        if not task:
+            print("Tasks db called : ✅")
+            task = get_object_or_404(Task, id=task_id)
+            cache.set(cache_key, task, timeout=300)
 
     if request.method == 'POST':
         form = TaskForm(request.POST, instance=task)
@@ -37,19 +43,23 @@ def create_edit_task(request, task_id=None):
                 task_obj.save()
 
                 
-                send_task_notification_email.delay(
-                    task_obj.assigned_to.email,
-                    task_obj.assigned_to.username,
-                    task_obj.title,
-                    task_obj.description,
-                    str(task_obj.due_date)
-                )
-                if task:
-                    messages.success(request, 'Task updated successfully. Email will be sent shortly.')
-                else:
-                    messages.success(request, 'Task created successfully. Email will be sent shortly.')
+            send_task_notification_email.delay(
+                task_obj.assigned_to.email,
+                task_obj.assigned_to.username,
+                task_obj.title,
+                task_obj.description,
+                str(task_obj.due_date)
+            )
+
+            if task_id:
+                cache.delete(f"task:{task_id}")
+
+            if task:
+                messages.success(request, 'Task updated successfully. Email will be sent shortly.')
+            else:
+                messages.success(request, 'Task created successfully. Email will be sent shortly.')
                     
-                return redirect('/dashboard/tasks/')
+            return redirect('/dashboard/tasks/')
         else:
             messages.warning(request, "Please enter valid data")
     else:
@@ -85,9 +95,9 @@ def task_table(request):
     selected_status = request.GET.get('status', '').strip()
 
     if request.user.role == 'employee':
-        tasks=Task.objects.filter(assigned_to = request.user)
+        tasks = Task.objects.select_related('project', 'assigned_to').filter(assigned_to=request.user)
     else:
-        tasks = Task.objects.all()
+        tasks = Task.objects.select_related('project', 'assigned_to').all()
 
     if selected_title:
         tasks = tasks.filter(project__name__icontains=selected_title)

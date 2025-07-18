@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
+from django.core.cache import cache
 
 from .models import *
 from .forms import *
@@ -112,7 +113,16 @@ def user_table(request):
 # create/edit user
 @login_required(login_url='/users/login/')
 def create_edit_update_user(request, user_id=None):
-    user = get_object_or_404(CustomUser, id=user_id) if user_id else None
+    user=None
+
+    if user_id:
+        cache_key=f"user:{user_id}"
+        user=cache.get(cache_key)
+
+        if not user:
+            print("Users db called : ✅")
+            user = get_object_or_404(CustomUser, id=user_id)
+            cache.set(cache_key, user, timeout=300)
 
     if request.method == "POST":
         form = RegisterationForm(request.POST, request.FILES, instance=user)
@@ -160,6 +170,10 @@ def create_edit_update_user(request, user_id=None):
 
             if not form.errors:
                 new_user.save()
+
+                if user_id:
+                    cache.delete(f"user:{user_id}")
+
                 messages.success(request, "User created successfully" if not user else "User updated successfully")
                 return redirect('/dashboard/users/')
 

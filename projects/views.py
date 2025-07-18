@@ -2,9 +2,8 @@ from django.shortcuts import render
 from django.shortcuts import render,redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.admin.views.decorators import staff_member_required
-from django.contrib.auth import authenticate, login
 from django.core.paginator import Paginator
+from django.core.cache import cache
 
 from .models import *
 from .forms import *
@@ -14,7 +13,18 @@ from users.models import *
 # create and edit project
 @login_required(login_url='/users/login/')
 def create_edit_project(request, project_id=None):
-    project=get_object_or_404(Project, id=project_id) if project_id else None
+    project=None
+
+    # attempt to cache if editing an exisitng project
+    if project_id:
+        cache_key=f"project:{project_id}"
+        project=cache.get(cache_key)
+
+        if not project:
+            print("Db called : ✅")
+            project=get_object_or_404(Project, id=project_id) if project_id else None
+            cache.set(cache_key, project, timeout=300)
+
     if request.method=="POST":
         form=createProject(request.POST, instance=project)
 
@@ -25,6 +35,9 @@ def create_edit_project(request, project_id=None):
                 new_project.created_by=request.user
             
             new_project.save()
+
+            if project_id:
+                cache.delete(f"project:{project_id}")
             
             if project:
                 messages.success(request, "Project updated successfully")
@@ -43,12 +56,11 @@ def create_edit_project(request, project_id=None):
 @login_required(login_url='/users/login/')
 def project_table(request):
 
-
     selected_title = request.GET.get('title', '').strip()
     selected_role = request.GET.get('role', '').strip()
     selected_username = request.GET.get('username', '').strip()
 
-    projects = Project.objects.all()
+    projects = Project.objects.select_related('created_by').all()
 
     if selected_title:
         projects = projects.filter(name__icontains=selected_title)
@@ -82,7 +94,7 @@ def project_table(request):
     })
 
 
-#delete project by admin
+# delete project by admin
 @login_required(login_url='/users/login/')
 def delete_project(request, project_id):
     if request.user.role == 'admin':
