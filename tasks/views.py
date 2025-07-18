@@ -41,6 +41,7 @@ def create_edit_task(request, task_id=None):
                 form.add_error('due_date', 'Due date cannot be after the project deadline.')
             else:
                 task_obj.save()
+                cache.delete('dashboard_counts')
 
                 
             send_task_notification_email.delay(
@@ -78,6 +79,7 @@ def status_update(request, task_id=None):
         if new_status in ['pending', 'in_progress', 'done']:
             task.status = new_status
             task.save()
+            cache.delete('dashboard_counts')
             messages.success(request, f"Task status updated to {new_status}.")
         else:
             messages.error(request, "Invalid status.")
@@ -120,7 +122,7 @@ def task_table(request):
     paginator = Paginator(tasks, 5)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    pagecount = tasks.count()
+    pagecount = paginator.count
 
     roles = CustomUser._meta.get_field('role').choices
     statuses = Task._meta.get_field('status').choices
@@ -148,6 +150,7 @@ def delete_task(request, task_id):
     task=get_object_or_404(Task, id=task_id)
     task.delete()
     messages.success(request, "Task deleted successfully")
+    cache.delete('dashboard_counts')
     return redirect('/dashboard/tasks')
 
 # task details by id

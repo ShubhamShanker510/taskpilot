@@ -21,12 +21,14 @@ from projects. views import *
 from tasks.views import *
 from django.conf import settings
 from django.conf.urls.static import static
+import debug_toolbar
 
 
 
 urlpatterns = [
     path('', redirect_to_login),
     path('users/', include('users.urls')),
+    path("debug/", include(debug_toolbar.urls)),
     path('logout/', logout_user, name="logout_user"),
     path('dashboard/profile/', user_profile, name="user_profile"),
     path('dashboard/profile/<int:user_id>/', update_own_profile, name="update_own_profile"),

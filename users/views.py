@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
 from django.core.cache import cache
+from django.db.models import Count
 
 from .models import *
 from .forms import *
@@ -17,24 +18,49 @@ def home(request):
 
     if hasattr(request.user, 'role') and request.user.role == 'employee':
         return redirect('/dashboard/tasks/')
+    
+    # try to fetch from cache
+    dashboard_data=cache.get('dashboard_counts')
 
-    pending_task=Task.objects.filter(status="pending").count()
-    completed_task=Task.objects.filter(status="done").count()
-    inprogress_task=Task.objects.filter(status="in_progress").count()
-    total_admin=CustomUser.objects.filter(role="admin").count()
-    total_manager=CustomUser.objects.filter(role="manager").count()
-    total_employee=CustomUser.objects.filter(role="employee").count()
-    total_projects=Project.objects.all().count()
+    if not dashboard_data:
+        # Grouped count for task status
+        task_counts=Task.objects.values('status').annotate(count=Count('id'))
+        task_count_dict={
+            'pending': 0,
+            'done': 0,
+            'in_progress': 0
+        }
 
-    return render(request, 'dashboard/home.html',{
-        'pending_task':pending_task,
-        'completed_task':completed_task,
-        'inprogress_task':inprogress_task,
-        'total_admin':total_admin,
-        'total_manager':total_manager,
-        'total_employee':total_employee,
-        'total_projects':total_projects
-    })
+        for item in task_counts:
+            task_count_dict[item['status']]=item['count']
+
+        #Grouped count for users roles
+        user_counts=CustomUser.objects.values('role').annotate(count=Count('id'))
+        user_count_dict={
+            'admin': 0,
+            'manager': 0,
+            'employee': 0
+        }
+
+        for item in user_counts:
+            user_count_dict[item['role']]=item['count']
+
+        total_projects=Project.objects.count()
+
+        dashboard_data={
+            'pending_task':task_count_dict['pending'],
+            'completed_task':task_count_dict['done'],
+            'inprogress_task':task_count_dict['in_progress'],
+            'total_admin':user_count_dict['admin'],
+            'total_manager':user_count_dict['manager'],
+            'total_employee':user_count_dict['employee'],
+            'total_projects':total_projects
+        }
+
+        #storing in cache for 5 min
+        cache.set('dashboard_counts', dashboard_data, timeout=300)
+
+    return render(request, 'dashboard/home.html', dashboard_data)
 
 
 # custom redirect to login
@@ -95,17 +121,15 @@ def user_table(request):
     selected_role=request.GET.get('role','').strip()
 
     if selected_username:
-        users=CustomUser.objects.filter(username__icontains=selected_username)
+        users=users.filter(username__icontains=selected_username)
     elif selected_role:
-        users=CustomUser.objects.filter(role=selected_role, is_superuser=False)
+        users=users.filter(role=selected_role)
 
     users=users.order_by("id")
-  
     paginator=Paginator(users, 5)
     page_number=request.GET.get('page')
     page=paginator.get_page(page_number)
-    usercount=users.count()
-
+    usercount=paginator.count
 
     return render(request, 'dashboard/user_table.html', {'users': page,'page_obj':page,'usercount':usercount, 'selected_username': selected_username,'selected_role': selected_role,})
 
@@ -170,6 +194,7 @@ def create_edit_update_user(request, user_id=None):
 
             if not form.errors:
                 new_user.save()
+                cache.delete('dashboard_counts')
 
                 if user_id:
                     cache.delete(f"user:{user_id}")
@@ -257,6 +282,7 @@ def delete_user(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
     user.delete()
     messages.success(request, "User deleted successfully")
+    cache.delete('dashboard_counts')
     return redirect(f'/dashboard/users/?page={selected_page}')
 
 

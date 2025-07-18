@@ -40,6 +40,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Application definition
 
 INSTALLED_APPS = [
+    'debug_toolbar',
     'cloudinary',
     'cloudinary_storage',
     'users.apps.UsersConfig',
@@ -62,7 +63,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'users.middleware.HandleLoginMiddleware', 
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
 ]
+INTERNAL_IPS = ["127.0.0.1"]
 
 ROOT_URLCONF = 'taskpilot.urls'
 
@@ -171,3 +174,8 @@ CACHES = {
         }
     }
 }
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_AGE = 3600 
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True

@@ -21,8 +21,8 @@ def create_edit_project(request, project_id=None):
         project=cache.get(cache_key)
 
         if not project:
-            print("Db called : ✅")
-            project=get_object_or_404(Project, id=project_id) if project_id else None
+            print("Projects db called : ✅")
+            project=get_object_or_404(Project, id=project_id)
             cache.set(cache_key, project, timeout=300)
 
     if request.method=="POST":
@@ -35,6 +35,7 @@ def create_edit_project(request, project_id=None):
                 new_project.created_by=request.user
             
             new_project.save()
+            cache.delete('dashboard_counts')
 
             if project_id:
                 cache.delete(f"project:{project_id}")
@@ -79,7 +80,7 @@ def project_table(request):
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 
-    pagecount = projects.count()
+    pagecount = paginator.count
 
     roles = CustomUser._meta.get_field('role').choices
 
@@ -101,6 +102,7 @@ def delete_project(request, project_id):
         project=get_object_or_404(Project, id=project_id)
         project.delete()
         messages.success(request, "Project deleted successfully")
+        cache.delete('dashboard_counts')
         return redirect('/dashboard/projects/')
     elif request.user.role =='manager':
         return redirect('/dashboard/projects/')
