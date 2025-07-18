@@ -29,7 +29,7 @@ def create_edit_task(request, task_id=None):
 
         if not task:
             print("Tasks db called : ✅")
-            task = get_object_or_404(Task, id=task_id)
+            task = get_object_or_404(Task.objects.select_related('assigned_to', 'project'), id=task_id)
             cache.set(cache_key, task, timeout=300)
 
     if request.method == 'POST':
@@ -71,7 +71,7 @@ def create_edit_task(request, task_id=None):
 # updating status of task
 @login_required(login_url='/users/login/')
 def status_update(request, task_id=None):
-    task = get_object_or_404(Task, id=task_id)
+    task = get_object_or_404(Task.objects.select_related('assigned_to', 'project'), id=task_id)
 
     if request.method == 'POST':
         new_status = request.POST.get('status')
@@ -147,7 +147,7 @@ def delete_task(request, task_id):
         return redirect('/dashboard/tasks/')
     
 
-    task=get_object_or_404(Task, id=task_id)
+    task=get_object_or_404(Task.objects.select_related('assigned_to', 'project'), id=task_id)
     task.delete()
     messages.success(request, "Task deleted successfully")
     cache.delete('dashboard_counts')
@@ -156,13 +156,13 @@ def delete_task(request, task_id):
 # task details by id
 @login_required(login_url='/users/login/')
 def task_detail(request, task_id):
-    task = get_object_or_404(Task, id=task_id)
-    comments = task.comments.all()
+    task = get_object_or_404(Task.objects.select_related('assigned_to', 'project'), id=task_id)
+    comments = task.comments.select_related('author').all()
     form = CommentForm()
     editing_comment = None
 
     if 'edit' in request.GET:
-        editing_comment = get_object_or_404(Comment, id=request.GET.get('edit'), task=task)
+        editing_comment = get_object_or_404(Comment.objects.select_related('author'), id=request.GET.get('edit'), task=task)
         form = CommentForm(instance=editing_comment)
 
     if request.method == "POST":
