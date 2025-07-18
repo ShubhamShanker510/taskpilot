@@ -28,31 +28,53 @@ TaskPilot is a Django-based task management system designed to organize users, p
 
 ```
 project/
-├── env/                # Virtual environment
-├── manage.py           # Django management script
-├── taskpilot/          # Main Django project
+├── .env                  # Environment variables (not tracked)
+├── .gitignore            # Git ignore rules
+├── Readme.Md             # Project documentation
+├── celerybeat-schedule   # Celery beat schedule file
+├── env/                  # Python virtual environment
+├── manage.py             # Django management script
+├── media/
+│   └── profile_images/   # Uploaded user images
+├── projects/             # Project app
+│   ├── migrations/
+│   ├── models.py
+│   ├── views.py
+│   └── ...
+├── requirements.txt      # Python dependencies
+├── static/
+│   └── adminlte/         # AdminLTE static files
+├── taskpilot/            # Main Django project
+│   ├── celery.py
 │   ├── settings.py
 │   ├── urls.py
 │   └── ...
-├── users/              # User app
-├── projects/           # Project app
-├── tasks/              # Task app
-├── static/             # Static files (AdminLTE)
-├── media/              # Media files (profile images, etc.)
-├── templates/          # Global templates
+├── tasks/                # Task app
+│   ├── migrations/
+│   ├── models.py
+│   ├── tasks.py
+│   ├── views.py
+│   └── ...
+├── templates/
 │   ├── dashboard/
 │   ├── layout/
 │   ├── users/
 │   └── utils/
-└── Readme.Md           # Project documentation
+└── users/                # User app
+    ├── migrations/
+    ├── models.py
+    ├── views.py
+    ├── context_processors.py
+    ├── middleware.py
+    └── ...
 ```
 
 ## Setup Instructions
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/ShubhamShanker510/Django_blog.git
-   cd Django_blog
+   git clone https://github.com/ShubhamShanker510/taskpilot.git
+   cd taskpilot
    ```
 2. **Create and activate a virtual environment**
    ```bash
@@ -106,8 +128,7 @@ project/
 
 ## Access the Application
 
-- **Home Page:** http://127.0.0.1:8000/
-- **Dashboard:** http://127.0.0.1:8000/dashboard/
+- **Dashboard:** http://127.0.0.1:8000/dashboard/home
 - **User Profile:** http://127.0.0.1:8000/dashboard/profile/
 - **Admin Panel:** http://127.0.0.1:8000/admin/
   - USERNAME: admin

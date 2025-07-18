@@ -22,7 +22,7 @@ def create_edit_project(request, project_id=None):
 
         if not project:
             print("Projects db called : ✅")
-            project=get_object_or_404(Project, id=project_id)
+            project=get_object_or_404(Project.objects.select_related('created_by'), id=project_id)
             cache.set(cache_key, project, timeout=300)
 
     if request.method=="POST":
@@ -99,7 +99,7 @@ def project_table(request):
 @login_required(login_url='/users/login/')
 def delete_project(request, project_id):
     if request.user.role == 'admin':
-        project=get_object_or_404(Project, id=project_id)
+        project=get_object_or_404(Project.objects.select_related('created_by'), id=project_id)
         project.delete()
         messages.success(request, "Project deleted successfully")
         cache.delete('dashboard_counts')
