@@ -184,7 +184,7 @@ def task_detail(request, task_id):
 # delete comment
 @login_required(login_url='/users/login/')
 def delete_comment(request, task_id, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id, task__id=task_id)
+    comment = get_object_or_404(Comment.objects.select_related('task', 'author'), id=comment_id, task__id=task_id)
 
     #either admin can delete comment or the user who send that comment
     if comment.author == request.user or request.user.role == 'admin':
@@ -197,7 +197,7 @@ def delete_comment(request, task_id, comment_id):
 # edit commenting 
 @login_required(login_url='/users/login/')
 def edit_comment(request, task_id, comment_id):
-    comment = get_object_or_404(Comment, id=comment_id, task__id=task_id)
+    comment = get_object_or_404(Comment.objects.select_related('task', 'author'), id=comment_id, task__id=task_id)
 
     if comment.author != request.user and request.user.role != 'admin':
         messages.error(request, "You do not have permission to edit this comment.")
