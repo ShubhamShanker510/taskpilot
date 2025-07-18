@@ -129,8 +129,7 @@ project/
 ## Access the Application
 
 - **Dashboard:** http://127.0.0.1:8000/dashboard/home
-- **User Profile:** http://127.0.0.1:8000/dashboard/profile/
-- **Admin Panel:** http://127.0.0.1:8000/admin/
+- **Login:** http://127.0.0.1:8000/users/login/
   - USERNAME: admin
   - PASSWORD: admin
 
