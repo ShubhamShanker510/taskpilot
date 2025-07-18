@@ -117,9 +117,12 @@ project/
    ```bash
    redis-server
    ```
-8. **Start Celery worker (in a new terminal)**
+8. **Start Celery worker and beat (in a new terminal)**
    ```bash
-   celery -A taskpilot worker -l info
+   celery -A taskpilot worker --loglevel=info
+   ```
+   ```bash
+   celery -A taskpilot beat --loglevel=info
    ```
 9. **Run the development server**
    ```bash
