@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from users.views import home_views, user_views
-from projects. views import *
+from projects.views import project_views
 from tasks.views import task_views, comment_views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -36,10 +36,10 @@ urlpatterns = [
     path('dashboard/users/create/', user_views.create_edit_update_user, name="create_user"),
     path('dashboard/users/edit/<int:user_id>/', user_views.create_edit_update_user, name="edit_user"),
     path('dashboard/users/delete/<int:user_id>/', user_views.delete_user, name="delete_user"),
-    path('dashboard/projects/', project_table, name="project_table"),
-    path('dashboard/projects/create/',create_edit_project, name="create_project"),
-    path('dashboard/projects/edit/<int:project_id>/',create_edit_project, name="edit_project"),
-    path('dashboard/projects/delete/<int:project_id>/',delete_project, name="delete_project"),
+    path('dashboard/projects/', project_views.project_table, name="project_table"),
+    path('dashboard/projects/create/',project_views.create_edit_project, name="create_project"),
+    path('dashboard/projects/edit/<int:project_id>/',project_views.create_edit_project, name="edit_project"),
+    path('dashboard/projects/delete/<int:project_id>/',project_views.delete_project, name="delete_project"),
     path('dashboard/tasks/', task_views.task_table, name='task_table'),
     path('dashboard/tasks/create/', task_views.create_edit_task, name='create_task'),
     path('dashboard/tasks/<int:task_id>/',task_views.task_detail, name="task_detail" ),
