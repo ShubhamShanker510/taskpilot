@@ -5,67 +5,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.core.paginator import Paginator
 from django.core.cache import cache
-from django.db.models import Count
 
-from .models import *
-from .forms import *
-from .tasks import *
+
+from ..models import *
+from ..forms import *
+from ..tasks import *
 from tasks.models import *
 from projects.models import *
+from ..services import  user_service
 
-@login_required(login_url='/users/login/')
-def home(request):
-
-    if hasattr(request.user, 'role') and request.user.role == 'employee':
-        return redirect('/dashboard/tasks/')
-    
-    # try to fetch from cache
-    dashboard_data=cache.get('dashboard_counts')
-
-    if not dashboard_data:
-        # Grouped count for task status
-        task_counts=Task.objects.values('status').annotate(count=Count('id'))
-        task_count_dict={
-            'pending': 0,
-            'done': 0,
-            'in_progress': 0
-        }
-
-        for item in task_counts:
-            task_count_dict[item['status']]=item['count']
-
-        #Grouped count for users roles
-        user_counts=CustomUser.objects.values('role').annotate(count=Count('id'))
-        user_count_dict={
-            'admin': 0,
-            'manager': 0,
-            'employee': 0
-        }
-
-        for item in user_counts:
-            user_count_dict[item['role']]=item['count']
-
-        total_projects=Project.objects.count()
-
-        dashboard_data={
-            'pending_task':task_count_dict['pending'],
-            'completed_task':task_count_dict['done'],
-            'inprogress_task':task_count_dict['in_progress'],
-            'total_admin':user_count_dict['admin'],
-            'total_manager':user_count_dict['manager'],
-            'total_employee':user_count_dict['employee'],
-            'total_projects':total_projects
-        }
-
-        #storing in cache for 5 min
-        cache.set('dashboard_counts', dashboard_data, timeout=300)
-
-    return render(request, 'dashboard/home.html', dashboard_data)
-
-
-# custom redirect to login
-def redirect_to_login(request):
-    return redirect('/users/login')
 
 #login form
 def login_user(request):
@@ -137,16 +85,7 @@ def user_table(request):
 # create/edit user
 @login_required(login_url='/users/login/')
 def create_edit_update_user(request, user_id=None):
-    user=None
-
-    if user_id:
-        cache_key=f"user:{user_id}"
-        user=cache.get(cache_key)
-
-        if not user:
-            print("Users db called : ✅")
-            user = get_object_or_404(CustomUser, id=user_id)
-            cache.set(cache_key, user, timeout=300)
+    user=user_service.get_user_by_id(user_id) if user_id else None
 
     if request.method == "POST":
         form = RegisterationForm(request.POST, request.FILES, instance=user)
@@ -180,17 +119,7 @@ def create_edit_update_user(request, user_id=None):
             image=request.FILES.get('image')
 
             if image:
-                image_name=f"profile_images/{user.username}_{image.name}"
-                image_path=os.path.join(settings.MEDIA_ROOT, image_name)
-
-                with open(image_path, 'wb+') as destination:
-                    for chunk in image.chunks():
-                        destination.write(chunk)
-
-                
-                upload_user_image_to_cloudinary.delay(user.id, image_path)
-
-
+                user_service.handle_user_image_upload(new_user, image)
 
             if not form.errors:
                 new_user.save()
@@ -212,7 +141,7 @@ def create_edit_update_user(request, user_id=None):
 # update own profile
 @login_required(login_url='/users/login/')
 def update_own_profile(request, user_id):
-    user = get_object_or_404(CustomUser, id=user_id)
+    user = user_service.get_user_by_id(user_id)
 
     if request.method == 'POST':
         form = RegisterationForm(request.POST, request.FILES, instance=user)
@@ -239,15 +168,7 @@ def update_own_profile(request, user_id):
             image=request.FILES.get('image')
 
             if image:
-                image_name=f"profile_images/{user.username}_{image.name}"
-                image_path=os.path.join(settings.MEDIA_ROOT, image_name)
-
-                with open(image_path, 'wb+') as destination:
-                    for chunk in image.chunks():
-                        destination.write(chunk)
-
-                
-                upload_user_image_to_cloudinary.delay(user.id, image_path)
+                user_service.handle_user_image_upload(user, image)
 
 
             if not form.errors:
@@ -295,10 +216,4 @@ def logout_user(request):
     except:
         messages.warning("Something went wrong")
         
-
-
-        if hasattr(request.user, 'role') and request.user.role == 'employee':
-            return redirect('/dashboard/tasks/')
-        elif hasattr(request.user, 'role') and (request.user.role == 'manager' or request.user.role == 'admin'):
-            return redirect('/dashboard/tasks')
                                                 

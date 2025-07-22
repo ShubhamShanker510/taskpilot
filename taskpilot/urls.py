@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from users.views import *
+from users.views import home_views, user_views
 from projects. views import *
 from tasks.views import task_views, comment_views
 from django.conf import settings
@@ -26,16 +26,16 @@ from django.conf.urls.static import static
 
 
 urlpatterns = [
-    path('', redirect_to_login),
+    path('', home_views.redirect_to_login),
     path('users/', include('users.urls')),
-    path('logout/', logout_user, name="logout_user"),
-    path('dashboard/profile/', user_profile, name="user_profile"),
-    path('dashboard/profile/<int:user_id>/', update_own_profile, name="update_own_profile"),
-    path('dashboard/home/', home, name="home"),
-    path('dashboard/users/', user_table, name="user_table"),
-    path('dashboard/users/create/', create_edit_update_user, name="create_user"),
-    path('dashboard/users/edit/<int:user_id>/', create_edit_update_user, name="edit_user"),
-    path('dashboard/users/delete/<int:user_id>/', delete_user, name="delete_user"),
+    path('logout/', user_views.logout_user, name="logout_user"),
+    path('dashboard/profile/', user_views.user_profile, name="user_profile"),
+    path('dashboard/profile/<int:user_id>/', user_views.update_own_profile, name="update_own_profile"),
+    path('dashboard/home/', home_views.home, name="home"),
+    path('dashboard/users/', user_views.user_table, name="user_table"),
+    path('dashboard/users/create/', user_views.create_edit_update_user, name="create_user"),
+    path('dashboard/users/edit/<int:user_id>/', user_views.create_edit_update_user, name="edit_user"),
+    path('dashboard/users/delete/<int:user_id>/', user_views.delete_user, name="delete_user"),
     path('dashboard/projects/', project_table, name="project_table"),
     path('dashboard/projects/create/',create_edit_project, name="create_project"),
     path('dashboard/projects/edit/<int:project_id>/',create_edit_project, name="edit_project"),
