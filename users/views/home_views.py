@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from ..services import dashboard_service
 
 
+
 # custom redirect to login
 def redirect_to_login(request):
     return redirect('/users/login')

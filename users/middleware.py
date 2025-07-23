@@ -29,7 +29,7 @@ class HandleLoginMiddleware:
         elif request.path.startswith('/dashboard/users/'):
             if request.user.role == 'manager':
                 return redirect('/dashboard/home/')
-            elif request.user.role == 'employee':
+            if request.user.role == 'employee':
                 return redirect('/dashboard/tasks/')
             
         elif request.path.startswith('/dashboard/projects/'):

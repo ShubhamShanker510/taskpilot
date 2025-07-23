@@ -1,12 +1,11 @@
 from django.shortcuts import get_object_or_404
 from django.core.cache import cache
-from django.contrib import messages
-
-from ..models import Task
-from users.models import CustomUser
-from ..forms import TaskForm
-from ..tasks import send_task_notification_email
 from django.core.paginator import Paginator
+
+
+from ..models import Task, Comment
+from users.models import CustomUser
+from ..tasks import send_task_notification_email
 
 
 def get_task_with_cache(task_id):
@@ -35,15 +34,9 @@ def save_task_and_notify(task_obj, task_id=None):
     if task_id:
         cache.delete(f"task:{task_id}")
 
-
 def update_task_status(task, new_status):
     task.status=new_status
     task.save()
-    cache.delete("dashboard_counts")
-
-
-def delete_task(task):
-    task.delete()
     cache.delete("dashboard_counts")
 
 def get_filtered_tasks(user, filters, page_number, per_page=5):

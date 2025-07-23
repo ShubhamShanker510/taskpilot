@@ -14,7 +14,7 @@ from django.urls import reverse_lazy
 from ..models import *
 from ..forms import *
 from ..tasks import *
-from tasks.models import *
+from tasks.models_parts import *
 from projects.models import *
 from ..services import  user_service
 

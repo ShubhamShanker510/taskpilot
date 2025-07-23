@@ -5,6 +5,7 @@ from users.models import CustomUser
 from users.tasks import upload_user_image_to_cloudinary
 from django.conf import settings
 
+
 def get_user_by_id(user_id):
     cache_key = f"user:{user_id}"
     user = cache.get(cache_key)
