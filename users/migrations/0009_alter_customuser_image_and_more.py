@@ -7,18 +7,24 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('users', '0008_alter_customuser_image'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("users", "0008_alter_customuser_image"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='customuser',
-            name='image',
-            field=cloudinary.models.CloudinaryField(default='https://res.cloudinary.com/damhf0l6i/image/upload/v1752740783/profile_fovdcg.webp', max_length=255, verbose_name='image'),
+            model_name="customuser",
+            name="image",
+            field=cloudinary.models.CloudinaryField(
+                default="https://res.cloudinary.com/damhf0l6i/image/upload/v1752740783/profile_fovdcg.webp",
+                max_length=255,
+                verbose_name="image",
+            ),
         ),
         migrations.AddIndex(
-            model_name='customuser',
-            index=models.Index(fields=['role', 'is_superuser'], name='Users_role_4d3eb9_idx'),
+            model_name="customuser",
+            index=models.Index(
+                fields=["role", "is_superuser"], name="Users_role_4d3eb9_idx"
+            ),
         ),
     ]

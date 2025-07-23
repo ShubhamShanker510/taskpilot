@@ -6,18 +6,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tasks', '0004_remove_task_assigned_to_task_assigned_to'),
+        ("tasks", "0004_remove_task_assigned_to_task_assigned_to"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='task',
-            name='status',
-            field=models.CharField(choices=[('pending', 'Pending'), ('in_progress', 'In Progress'), ('done', 'Done')], db_index=True, default='pending', max_length=50),
+            model_name="task",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("pending", "Pending"),
+                    ("in_progress", "In Progress"),
+                    ("done", "Done"),
+                ],
+                db_index=True,
+                default="pending",
+                max_length=50,
+            ),
         ),
         migrations.AlterField(
-            model_name='task',
-            name='title',
+            model_name="task",
+            name="title",
             field=models.CharField(db_index=True, max_length=200),
         ),
     ]

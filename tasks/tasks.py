@@ -1,8 +1,10 @@
 from celery import shared_task
-from django.utils import timezone
-from django.core.mail import send_mail
 from django.conf import settings
+from django.core.mail import send_mail
+from django.utils import timezone
+
 from .models import Task
+
 
 @shared_task
 def send_task_notification_email(user_email, username, title, description, due_date):
@@ -33,12 +35,15 @@ def send_task_notification_email(user_email, username, title, description, due_d
         html_message=html_message,
     )
 
+
 @shared_task
 def send_due_soon_reminders():
-    today=timezone.now().date()
-    target_date= today+timezone.timedelta(days=3)
-    due_tasks=Task.objects.filter(due_date=target_date, status__in=["pending", "in_progress"])
-    
+    today = timezone.now().date()
+    target_date = today + timezone.timedelta(days=3)
+    due_tasks = Task.objects.filter(
+        due_date=target_date, status__in=["pending", "in_progress"]
+    )
+
     for task in due_tasks:
         user = task.assigned_to
         subject = f"Reminder: Task '{task.title}' is due in 3 days"

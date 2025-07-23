@@ -8,18 +8,22 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('tasks', '0003_remove_task_assigned_to_task_assigned_to'),
+        ("tasks", "0003_remove_task_assigned_to_task_assigned_to"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='task',
-            name='assigned_to',
+            model_name="task",
+            name="assigned_to",
         ),
         migrations.AddField(
-            model_name='task',
-            name='assigned_to',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="task",
+            name="assigned_to",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
     ]
